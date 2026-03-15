@@ -1,140 +1,153 @@
 ---
 name: nous-reasoning
-description: >
-  Mine NOUS by solving NP-complete 3-SAT problems. Optimized ProbSAT solver
-  at ~8,900 SAT/s. Cross-platform: Linux, macOS, Windows (WSL).
-  No full node or Go compiler required — downloads pre-built binary.
+description: "Mine NOUS cryptocurrency by solving NP-complete 3-SAT problems. Use when the user asks to mine NOUS, start/stop mining, check mining status, check NOUS balance, create a NOUS wallet, send NOUS, or benchmark mining performance."
+version: 1.0.0
 metadata:
   openclaw:
     emoji: "🧠"
+    requires:
+      bins: ["nous-miner"]
     install:
-      - id: download-miner
-        kind: shell
-        command: ./install.sh
-        bins: ["~/.nous/nous-miner"]
-        label: "Download NOUS miner binary"
-allowed-tools: Bash Read Write
+      - id: "install-nous-miner"
+        kind: "shell"
+        command: |
+          MINER_VERSION="v1.2.1"
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          ARCH=$(uname -m)
+          case "${OS}_${ARCH}" in
+            linux_x86_64) FILENAME="nous-miner-linux-amd64" ;;
+            darwin_arm64) FILENAME="nous-miner-darwin-arm64" ;;
+            darwin_x86_64) FILENAME="nous-miner-darwin-amd64" ;;
+            *) echo "Unsupported: ${OS} ${ARCH}"; exit 1 ;;
+          esac
+          mkdir -p "$HOME/.nous"
+          curl -L --fail -o "$HOME/.nous/nous-miner" "https://github.com/nous-reasoner/nous/releases/download/${MINER_VERSION}/${FILENAME}"
+          chmod +x "$HOME/.nous/nous-miner"
+          echo "Installed: $HOME/.nous/nous-miner"
+        bins: ["nous-miner"]
+        label: "Install NOUS Miner (curl)"
 ---
 
-# NOUS Reasoning Skill
+# NOUS Reasoning
 
-Mine NOUS — the first cryptocurrency where every block requires
-solving an NP-complete problem. No full node required; the miner
-connects to a public RPC endpoint and solves 3-SAT formulas locally.
+Mine NOUS by solving NP-complete 3-SAT problems. NOUS is a proof-of-work blockchain where mining means solving logic puzzles, not hashing. Each block rewards exactly 1 NOUS, forever — no halving, no supply cap.
 
-## What is NOUS
+The `nous-miner` binary is installed at `$HOME/.nous/nous-miner`. All commands below use this path.
 
-NOUS is a proof-of-work blockchain where mining = solving randomly
-generated 3-SAT formulas. Instead of brute-force hashing (Bitcoin),
-each block attempt requires genuine logical reasoning.
+## When to use this skill
 
-- Block time: 150 seconds
-- Reward: 1 NOUS per block, forever (no halving)
-- Consensus: Cogito Consensus (3-SAT + SHA-256 + ASERT difficulty)
-- SAT parameters: 256 variables, 986 clauses (ratio 3.85)
-- Solver: ProbSAT (optimized, ~8,900 SAT/s)
+Use this skill when the user mentions any of the following:
+- Mining NOUS or NOUS cryptocurrency
+- Starting or stopping a miner
+- Checking mining status or hashrate
+- Checking NOUS balance
+- Creating a NOUS wallet
+- Sending NOUS to an address
+- Benchmarking mining performance
+- Anything related to 3-SAT solving or NP-complete proof of work
 
-**Public RPC:** http://rpc.nouschain.org/api
+## Available Commands
 
-## Setup
+### Create a new wallet
 
-### Install
-
-```bash
-~/.nous/nous-miner version 2>/dev/null || ./install.sh
-```
-
-### Create a wallet
+When the user asks to create a wallet or needs a NOUS address:
 
 ```bash
-~/.nous/nous-miner wallet create
+$HOME/.nous/nous-miner wallet create
 ```
 
-Save the private key — it is NOT stored anywhere.
+This outputs a private key and a nous1... address. **Important:** Warn the user to save their private key immediately. It is not stored anywhere.
 
-## Commands
+### Get address from private key
 
-All commands output JSON by default (for agent parsing).
+When the user has a private key and needs to see the corresponding address:
+
+```bash
+$HOME/.nous/nous-miner wallet address --privkey=PRIVATE_KEY_HEX
+```
 
 ### Start mining
 
-```bash
-# Foreground (Ctrl+C to stop)
-~/.nous/nous-miner start --address=nous1q...
+When the user wants to start mining NOUS:
 
-# Background (daemon mode)
-~/.nous/nous-miner start --address=nous1q... --daemon
+```bash
+$HOME/.nous/nous-miner start --address=NOUS_ADDRESS --rpc=http://rpc.nouschain.org/api --daemon
 ```
+
+Required: `--address` must be a valid nous1... address.
+The `--daemon` flag runs the miner in the background.
+Optional: `--threads=N` to limit CPU usage (default: all cores).
+
+After starting, confirm to the user that mining has begun and remind them that block rewards are 1 NOUS per block with a ~150 second average block time.
 
 ### Stop mining
 
-```bash
-~/.nous/nous-miner stop
-```
-
-### Check status
+When the user wants to stop mining:
 
 ```bash
-~/.nous/nous-miner status
+$HOME/.nous/nous-miner stop
 ```
 
-Returns JSON: `{"mining": true/false, "block_height": N, "difficulty": N, "peers": N}`
+### Check mining status
+
+When the user asks about mining status, hashrate, or network info:
+
+```bash
+$HOME/.nous/nous-miner status --rpc=http://rpc.nouschain.org/api
+```
+
+This returns JSON with: mining (true/false), hashrate, block_height, difficulty, peers, uptime. Parse the JSON and present it in a readable format to the user.
 
 ### Check balance
 
-```bash
-~/.nous/nous-miner balance --address=nous1q...
-```
-
-Returns JSON: `{"address": "...", "balance": "42.50000000", "unit": "NOUS"}`
-
-### Derive address from private key
+When the user asks about their NOUS balance:
 
 ```bash
-~/.nous/nous-miner wallet address --privkey=HEX
+$HOME/.nous/nous-miner balance --address=NOUS_ADDRESS --rpc=http://rpc.nouschain.org/api
 ```
+
+Returns JSON with balance and immature (unconfirmed mining rewards). Present both values to the user.
 
 ### Send NOUS
 
+When the user wants to send NOUS to another address:
+
 ```bash
-~/.nous/nous-miner send --from-privkey=HEX --to=nous1q... --amount=5.0
+$HOME/.nous/nous-miner send --from-privkey=PRIVATE_KEY_HEX --to=RECIPIENT_ADDRESS --amount=AMOUNT --rpc=http://rpc.nouschain.org/api --yes
 ```
 
-Agent usage (skip confirmation): add `--yes`
+**Before executing:** Always confirm the transaction details with the user first:
+- From address (derive from privkey)
+- To address
+- Amount
+- Remind them this is irreversible
+
+Only proceed after the user explicitly confirms.
 
 ### Benchmark
 
-```bash
-~/.nous/nous-miner benchmark --rounds=50
-```
-
-### Version
+When the user wants to test mining performance:
 
 ```bash
-~/.nous/nous-miner version
+$HOME/.nous/nous-miner benchmark --rounds=20
 ```
 
-## Display Format
+Returns average, best, and worst SAT/s. The optimized ProbSAT solver typically achieves ~8,900 SAT/s on modern hardware.
 
-When reasoning starts, tell the user:
+## Rules
 
-```
-NOUS Reasoner started!
-  Mode: RPC-based (no full node required)
-  Each block attempt solves a 256-variable, 986-clause 3-SAT formula.
-  Reward: 1 NOUS per block (150 second target).
+- Never store or log private keys. If the user shares a private key, use it for the immediate operation only.
+- Always use `http://rpc.nouschain.org/api` as the default RPC endpoint unless the user specifies otherwise.
+- The `nous-miner` binary path is always `$HOME/.nous/nous-miner`.
+- If a command fails with "connection refused" or timeout, suggest the user check their network connection or try again in a moment.
+- If the binary is not found, tell the user the skill needs to be reinstalled.
+- When reporting mining performance, mention that NOUS uses 3-SAT (NP-complete) proof of work, not SHA-256 hashing.
+- Block reward is always 1 NOUS. There is no halving and no supply cap.
+- Mining difficulty adjusts automatically via ASERT algorithm (same as Bitcoin Cash).
 
-  Say "check mining status" or "stop reasoning".
-```
+## Resources
 
-## Troubleshooting
-
-- **Can't connect:** verify RPC is reachable: `curl -s http://rpc.nouschain.org/api -d '{"method":"getmininginfo","params":[],"id":1}'`
-- **No blocks found:** normal with higher difficulty. Check status for SAT/s progress.
-- **Daemon logs:** `tail -20 ~/.nous/miner.log`
-
-## Safety
-
-- Private keys are shown once at creation — save them securely.
-- CPU-based solver, uses all cores by default (configurable with `--threads`).
-- Coinbase maturity: mined coins require 100 confirmations before spending.
+- Block Explorer: https://explorer.nouschain.org
+- Documentation: https://docs.nouschain.org
+- Source Code: https://github.com/nous-reasoner/nous
+- Run a Full Node: https://docs.nouschain.org/guides/run-a-full-node

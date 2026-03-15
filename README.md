@@ -1,39 +1,43 @@
-# NOUS Reasoning Skill
+# NOUS Reasoning Skill for OpenClaw
 
-OpenClaw skill for mining NOUS — the first cryptocurrency where every block requires solving an NP-complete 3-SAT problem.
+Mine NOUS by solving NP-complete 3-SAT problems. An AI agent's first job.
+
+## What is NOUS?
+
+NOUS is a proof-of-work blockchain where mining = solving logic puzzles (3-SAT), not hashing. Each block rewards exactly 1 NOUS, forever.
 
 ## Install
 
-```bash
-./install.sh
-```
+Paste this in your OpenClaw chat:
 
-Downloads a pre-built `nous-miner` binary for your platform (Linux x86_64, macOS arm64/x86_64).
+> Install this skill: https://github.com/nous-reasoner/nous-reasoning-skill
+
+Or manually:
+
+```bash
+mkdir -p ~/.openclaw/skills
+cd ~/.openclaw/skills
+git clone https://github.com/nous-reasoner/nous-reasoning-skill.git nous-reasoning
+```
 
 ## Usage
 
-```bash
-# Create a wallet
-~/.nous/nous-miner wallet create
+Talk to your OpenClaw agent:
 
-# Start mining
-~/.nous/nous-miner start --address=YOUR_NOUS_ADDRESS
+- "Create a NOUS wallet"
+- "Start mining NOUS to nous1qxxx..."
+- "How's my mining going?"
+- "What's my NOUS balance?"
+- "Send 5 NOUS to nous1qyyy..."
+- "Benchmark my mining speed"
 
-# Check status
-~/.nous/nous-miner status
+## Performance
 
-# Check balance
-~/.nous/nous-miner balance --address=YOUR_NOUS_ADDRESS
+Optimized ProbSAT solver: ~8,900 SAT/s on modern hardware.
+Pluggable solver interface for advanced users.
 
-# Stop mining
-~/.nous/nous-miner stop
-```
+## Links
 
-## About NOUS
-
-- Block time: 150 seconds
-- Reward: 1 NOUS per block (no halving)
-- Consensus: 3-SAT + SHA-256 + ASERT difficulty
-- Solver: ProbSAT (~8,900 SAT/s)
-
-Learn more: https://github.com/nous-reasoner/nous
+- Explorer: https://explorer.nouschain.org
+- Docs: https://docs.nouschain.org
+- Source: https://github.com/nous-reasoner/nous

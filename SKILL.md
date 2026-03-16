@@ -25,22 +25,22 @@ If the binary is not found, install it:
 
 **Linux x86_64:**
 ```bash
-mkdir -p $HOME/.nous && curl -L -o $HOME/.nous/nous-reasoner https://github.com/nous-reasoner/nous/releases/download/nous-reasoner-v1.0.0/nous-reasoner-linux-amd64 && chmod +x $HOME/.nous/nous-reasoner
+mkdir -p $HOME/.nous && curl -L -o $HOME/.nous/nous-reasoner https://github.com/nous-reasoner/nous/releases/download/NOUS-OpenClaw-v1.0.1/nous-reasoner-linux-amd64 && chmod +x $HOME/.nous/nous-reasoner
 ```
 
 **macOS Apple Silicon:**
 ```bash
-mkdir -p $HOME/.nous && curl -L -o $HOME/.nous/nous-reasoner https://github.com/nous-reasoner/nous/releases/download/nous-reasoner-v1.0.0/nous-reasoner-darwin-arm64 && chmod +x $HOME/.nous/nous-reasoner
+mkdir -p $HOME/.nous && curl -L -o $HOME/.nous/nous-reasoner https://github.com/nous-reasoner/nous/releases/download/NOUS-OpenClaw-v1.0.1/nous-reasoner-darwin-arm64 && chmod +x $HOME/.nous/nous-reasoner
 ```
 
 **macOS Intel:**
 ```bash
-mkdir -p $HOME/.nous && curl -L -o $HOME/.nous/nous-reasoner https://github.com/nous-reasoner/nous/releases/download/nous-reasoner-v1.0.0/nous-reasoner-darwin-amd64 && chmod +x $HOME/.nous/nous-reasoner
+mkdir -p $HOME/.nous && curl -L -o $HOME/.nous/nous-reasoner https://github.com/nous-reasoner/nous/releases/download/NOUS-OpenClaw-v1.0.1/nous-reasoner-darwin-amd64 && chmod +x $HOME/.nous/nous-reasoner
 ```
 
 **Windows (PowerShell):**
 ```powershell
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.nous"; Invoke-WebRequest -Uri "https://github.com/nous-reasoner/nous/releases/download/nous-reasoner-v1.0.0/nous-reasoner-windows-amd64.exe" -OutFile "$env:USERPROFILE\.nous\nous-reasoner.exe"
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.nous"; Invoke-WebRequest -Uri "https://github.com/nous-reasoner/nous/releases/download/NOUS-OpenClaw-v1.0.1/nous-reasoner-windows-amd64.exe" -OutFile "$env:USERPROFILE\.nous\nous-reasoner.exe"
 ```
 
 ## When to use this skill
@@ -71,7 +71,11 @@ Outputs a private key and a nous1... address. **Warn the user to save their priv
 $HOME/.nous/nous-reasoner start --address=NOUS_ADDRESS --rpc=http://rpc.nouschain.org/api --daemon
 ```
 
-Optional: `--threads=N` to limit CPU cores.
+Optional flags:
+- `--threads=N` to limit CPU cores
+- `--seed-mode=MODE` seed strategy: `sequential` (default), `random`, `fixed`
+- `--seed-start=N` starting seed value (default: 0)
+- `--seed-step=N` seeds per round (default: 100000)
 
 ### Stop solving
 
